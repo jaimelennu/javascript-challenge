@@ -6,12 +6,11 @@
 
 document.addEventListener('DOMContentLoaded', states);
 
-
-
+//Called when the DOM is loaded and ready for manipulation
+//Populates the state select based on the usStates.js file
 function states() {
    var state = usStates;
    console.log(state);
-
 
    var element = document.getElementById('state');
    console.log(element);
@@ -23,12 +22,12 @@ function states() {
       element.appendChild(opt);
    }
 
-
    document.addEventListener('change', occupation);
 
+   //Called when other is selected for occupation
+   //opens up another input box to add what the job is
    function occupation() {
       var elem = document.getElementById('occupation');
-
       if (elem.value === 'other') {
          document.getElementById('occupationOther').style.display = "block";
       } else if (elem.value !== 'other') {
@@ -39,6 +38,8 @@ function states() {
 
    document.getElementById("cancelButton").addEventListener('click', noThanks);
 
+   //called when use clicks on the no thanks button. 
+   //Asks them to confirm if they want to leave and if they do then takes them to google
    function noThanks() {
       var txt;
       var r = confirm("Do you really want to leave this page?");
@@ -49,9 +50,14 @@ function states() {
       }
    }
 
+ var ourForm = document.getElementById("signup");
+ ourForm.addEventListener('submit', onSubmit);
+
+
 }
 
-
+//called when the user clicks the submit button. 
+//validates all the required fields
 function validateForm(form) {
       var requiredFields = ['firstName', 'lastName', 'address1', 'city', 'state', 'zip', 'birthdate'];
 
@@ -69,6 +75,7 @@ function validateForm(form) {
  * */
 function validateRequiredField(field) {
       if (0 == this[field].value.trim().length) {
+
          this[field].style.border = "1px solid #FF0000";
          return false;
       } else {
@@ -78,6 +85,8 @@ function validateRequiredField(field) {
 
    } //validateRequiredField()
 
+//validates the occupation field to make sure the occupationOther field is filled in
+//when other is chosen
 function validateOccupation(field) {
    var elem = document.getElementById(occupation);
    if (elem.value === 'other') {
@@ -88,6 +97,7 @@ function validateOccupation(field) {
    }
 }
 
+//validates zip to make sure that it is a 5 digit number
 function validateZip(field) {
    var elem = document.getElementById(zip);
    var zipRegExp = new RegExp('^\\d{5}$');
@@ -98,12 +108,30 @@ function validateZip(field) {
 
 }
 
+//validates birthdate to make sure that the user is over the age of 13
 function validateBirthdate(field) {
    var elem = document.getElementById(birthdate);
-   if (elem.value < 13) {
+   var age = getAge(elem.value);
+   if (age < 13) {
+
       document.getElementById("birthdateMessage").innerHTML = "You must be 13 years or older to signup";
+      document.getElementById("birthdateMessage").style.display = 'inline';
    }
 }
+
+//calculates the age from the birthdate
+function getAge(dateString) {
+    var today = new Date();
+    var birthDate = new Date(dateString);
+    var age = today.getFullYear() - birthDate.getFullYear();
+    var m = today.getMonth() - birthDate.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
+    {
+        age--;
+    }
+    return age;
+}
+
 
 function onSubmit(evt) {
    var valid = validateForm(this);
