@@ -4,7 +4,7 @@
 */
 "use strict";
 
-document.addEventListener('DOMContentLoaded', states);
+
 
 //Called when the DOM is loaded and ready for manipulation
 //Populates the state select based on the usStates.js file
@@ -43,15 +43,15 @@ function states() {
    function noThanks() {
       var txt;
       var r = confirm("Do you really want to leave this page?");
-      if (r == true) {
+      if (r === true) {
          location.replace("http://google.com");
       } else {
          location.reload();
       }
    }
 
- var ourForm = document.getElementById("signup");
- ourForm.addEventListener('submit', onSubmit);
+   var ourForm = document.getElementById("signup");
+   ourForm.addEventListener('submit', onSubmit);
 
 
 }
@@ -60,12 +60,21 @@ function states() {
 //validates all the required fields
 function validateForm(form) {
       var requiredFields = ['firstName', 'lastName', 'address1', 'city', 'state', 'zip', 'birthdate'];
+      var valid = true;
 
-      if (requiredFields.forEach(validateRequiredField, form) && validateOccupation(occupation) && validateZip(zip) && validateBirthdate(birthdate)) {
-         return true;
+
+
+      if (requiredFields.forEach(validateRequiredField, form)) {
+         valid = true;
       } else {
-         return false;
+         valid = false;
       }
+
+      valid = validateOccupation(occupation, occupationOther);
+      valid = validateZip(zip);
+      valid = getAge(birthdate);
+
+      return valid;
 
    } //validateForm()
 
@@ -74,7 +83,7 @@ function validateForm(form) {
  * it will mark the field as invalid and return false. Otherwise it will return true.
  * */
 function validateRequiredField(field) {
-      if (0 == this[field].value.trim().length) {
+      if (0 === this[field].value.trim().length) {
 
          this[field].style.border = "1px solid #FF0000";
          return false;
@@ -87,58 +96,70 @@ function validateRequiredField(field) {
 
 //validates the occupation field to make sure the occupationOther field is filled in
 //when other is chosen
-function validateOccupation(field) {
-   var elem = document.getElementById(occupation);
-   if (elem.value === 'other') {
-      if (document.getElementById(occupationOther).value.trim().length !== 0) {
-         document.getElementById(occupationOther).style.border = "1px solid #FF0000";
+function validateOccupation(occupation, occupationOther) {
+   //var occ= document.getElementById(occupation);
+   if (occupation.value === 'other') {
+      if (occupationOther.value.trim().length === 0) {
+         occupationOther.style.border = "1px solid #FF0000";
+         return false;
+      } else {
+         occupationOther.style.border = "none";
+         return true;
       }
 
    }
 }
 
 //validates zip to make sure that it is a 5 digit number
-function validateZip(field) {
-   var elem = document.getElementById(zip);
+function validateZip(zip) {
+   //var zipCode = document.getElementById(zip);
    var zipRegExp = new RegExp('^\\d{5}$');
-   if (zipRegExp.test(elem.value)) {
-      elem.style.border = "1px solid #FF0000";
+   if (zipRegExp.test(zip.value) === false) {
+      zip.className = 'form-control';
+      zip.style.border = "1px solid #FF0000";
+      return false;
+   } else {
+      return true;
    }
 
 
 }
 
-//validates birthdate to make sure that the user is over the age of 13
-function validateBirthdate(field) {
-   var elem = document.getElementById(birthdate);
-   var age = getAge(elem.value);
-   if (age < 13) {
 
-      document.getElementById("birthdateMessage").innerHTML = "You must be 13 years or older to signup";
-      document.getElementById("birthdateMessage").style.display = 'inline';
-   }
-}
 
 //calculates the age from the birthdate
-function getAge(dateString) {
-    var today = new Date();
-    var birthDate = new Date(dateString);
-    var age = today.getFullYear() - birthDate.getFullYear();
-    var m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) 
-    {
-        age--;
-    }
-    return age;
-}
+function getAge(birthdate) {
+   var today = new Date();
+   var birthDate = birthdate.valueAsDate;
+   var age = today.getFullYear() - birthDate.getUTCFullYear();
+   var m = today.getMonth() - birthDate.getUTCMonth();
+   var d = today.getDate() - birthDate.getUTCDate();
+   if (m < 0 || (m === 0 && d < 0)) {
+      age--;
+   }
 
+   if (age < 13) {
+      document.getElementById("birthdateMessage").innerHTML = "You must be 13 years or older to signup";
+      birthdate.style.border = "1px solid #FF0000";
+      return false;
+   } else {
+      document.getElementById("birthdateMessage").style.display = "none";
+      return true;
+   }
+
+}
 
 function onSubmit(evt) {
+   console.log(" worked");
    var valid = validateForm(this);
    console.log("onsubmit worked");
-   if (!valid && evt.preventDefault) {
+   if (!valid) {
       evt.preventDefault();
+      evt.returnValue = false;
+      return false;
    }
-   evt.returnValue = valid;
-   return valid;
+
 }
+
+
+document.addEventListener('DOMContentLoaded', states);
